@@ -1,3 +1,7 @@
+# Try It Online
+
+https://codesandbox.io/embed/nifty-sun-kenq35?theme=light
+
 ```tsx
 import React, { FC } from 'react'
 import { Provider, createStore, connect } from 'stoe'
