@@ -1,9 +1,9 @@
 import { Context } from 'react'
 import { isFunction } from './utils'
 
-type State = Record<string | number | symbol, any>
+export type State = Record<string | number | symbol, any>
 
-type Actions = Record<string, (...arg: any[]) => void>
+export type Actions = Record<string, (...arg: any[]) => void>
 
 type Subscriber = () => void
 
