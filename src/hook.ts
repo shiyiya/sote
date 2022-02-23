@@ -3,7 +3,7 @@ import { PinkStoreActions, PinkStoreState, Store, State, Actions } from './store
 
 export type ConnectOptions<S, RS, RA> = {
   mapStateToProps: (state: PinkStoreState<S>) => RS
-  mapActionsToProps: (actions: PinkStoreActions<S>) => RA
+  mapActionsToProps?: (actions: PinkStoreActions<S>) => RA
 }
 
 export const useStore = <S extends Store<any, any>, RS extends State = {}, RA extends Actions = {}>(
@@ -14,21 +14,18 @@ export const useStore = <S extends Store<any, any>, RS extends State = {}, RA ex
     throw new Error('Store is not defined')
   }
 
-  const [_state, setState] = useState(0)
-  const up = () => {
-    setState((state) => state + 1)
-  }
+  const [_state, up] = useUpdate()
 
   const { mapStateToProps, mapActionsToProps } = options
 
-  const trackEffect = () => {
+  const trackEffect = (): RS => {
     if (_state === 0) {
       Store.tracksubscriber = up
-      const s = mapStateToProps?.(context as any)
+      const s = mapStateToProps(context as any)
       Store.tracksubscriber = null
       return s
     } else {
-      return mapStateToProps?.(context.state)
+      return mapStateToProps(context.state)
     }
   }
 
@@ -44,6 +41,11 @@ export const useStore = <S extends Store<any, any>, RS extends State = {}, RA ex
   }, [])
 
   return store
+}
+
+export const useUpdate = () => {
+  const [state, setState] = useState(0)
+  return [state, () => setState((state) => state + 1)] as const
 }
 
 const s = new Store({ state: { a: 1 }, actions: { add() {} } })
