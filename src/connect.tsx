@@ -25,7 +25,7 @@ export const connect =
         Store.tracksubscriber = null
         return s
       } else {
-        return mapStateToProps?.(context as any)
+        return mapStateToProps?.(context.state)
       }
     }
 

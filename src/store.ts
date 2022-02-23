@@ -3,7 +3,7 @@ import { isFunction } from './utils'
 
 type State = Record<string | number | symbol, any>
 
-type Actions = Record<string, any>
+type Actions = Record<string, (...arg: any[]) => void>
 
 type Subscriber = () => void
 
@@ -19,16 +19,16 @@ export type PinkStoreActions<S> = S extends Store<any, infer T> ? T : never
 export class Store<S extends State = {}, A extends Actions = {}> {
   public static tracksubscriber: Subscriber | null = null
   public static context: Context<any> | null = null
-  public effectDeps = new Map<any, Set<Function>>()
 
   public state: S
   public actions: A = {} as A
-  public subscriber: Subscriber[] = []
+  private subscriber: Subscriber[] = []
 
   private effectKeys = new Set<string>()
+  private effectDeps = new Map<any, Set<Function>>()
 
-  constructor(options: StoreOptions<S, A>) {
-    this.state = isFunction(options.state) ? options.state() : options.state
+  constructor({ state, actions }: StoreOptions<S, A>) {
+    this.state = isFunction(state) ? state() : state
 
     Object.keys(this.state).forEach((key) => {
       Object.defineProperty(this, key, {
@@ -56,11 +56,10 @@ export class Store<S extends State = {}, A extends Actions = {}> {
       })
     })
 
-    for (const key in options.actions) {
+    for (const key in actions) {
       // @ts-ignore
       this.actions[key] = (...args: any[]) => {
-        options.actions?.[key].apply(this, args)
-        // this.notify();
+        actions?.[key].apply(this, args)
         this.lazyNotify(this.effectKeys)
         this.effectKeys.clear()
       }
