@@ -94,17 +94,3 @@ export const createStore = <S extends State = {}, A extends Actions = {}>(
 ) => {
   return new Store(options)
 }
-
-createStore({
-  state: {
-    a: 1
-  },
-  actions: {
-    set(n: number) {
-      this.a = n
-    },
-    add() {
-      this.a++
-    }
-  }
-})
