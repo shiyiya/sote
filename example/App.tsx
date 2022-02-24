@@ -1,6 +1,8 @@
 import React, { useState } from 'react'
 import { useStore, Provider } from '../src'
 import { todoStore } from './store'
+import './index.css'
+import ReactDOM from 'react-dom'
 
 const Header = () => {
   return (
@@ -96,8 +98,9 @@ function App() {
   )
 }
 
-export default () => (
+ReactDOM.render(
   <Provider value={todoStore}>
     <App />
-  </Provider>
+  </Provider>,
+  document.getElementById('app')
 )
