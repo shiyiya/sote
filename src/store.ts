@@ -22,26 +22,30 @@ export class Store<S extends State = {}, A extends Actions = {}> {
   public state: S
   public actions: A = {} as A
 
-  private effectKeys = new Set<string>()
-  private effectDeps = new Map<string, Set<Function>>()
+  private effectKeys = new Set<string | symbol>()
+  private effectDeps = new Map<string | symbol, Set<Function>>()
 
   constructor({ state, actions }: StoreOptions<S, A>) {
-    this.state = isFunction(state) ? state() : state
+    const rawState = isFunction(state) ? state() : state
+
+    this.state = new Proxy(rawState, {
+      get: (target, key) => {
+        this.trackEffect(key)
+        return Reflect.get(target, key)
+      }
+    })
 
     Object.keys(this.state).forEach((key) => {
       Object.defineProperty(this, key, {
-        get: () => {
-          //todo: track all & deep
-          this.trackEffect(key)
-          return Reflect.get(this.state, key)
-        },
         set: (value) => {
           if (value !== Reflect.get(this.state, key)) {
             this.trackKeys(key)
             return Reflect.set(this.state, key, value)
           }
-
           return false
+        },
+        get: () => {
+          return Reflect.get(this.state, key)
         }
       })
     })
@@ -56,7 +60,7 @@ export class Store<S extends State = {}, A extends Actions = {}> {
     }
   }
 
-  public trackEffect(key: string) {
+  public trackEffect(key: string | symbol) {
     if (Store.tracksubscriber) {
       let deps = this.effectDeps.get(key)
       if (!deps) {
@@ -67,7 +71,7 @@ export class Store<S extends State = {}, A extends Actions = {}> {
     }
   }
 
-  public trackKeys(key: string) {
+  public trackKeys(key: string | symbol) {
     this.effectKeys.add(key)
   }
 
@@ -80,7 +84,7 @@ export class Store<S extends State = {}, A extends Actions = {}> {
     })
   }
 
-  public notify(keys: Set<string>) {
+  public notify(keys: Set<string | symbol>) {
     keys.forEach((key) => {
       const deps = this.effectDeps.get(key)
       batch(() => deps?.forEach((subscriber) => subscriber()))

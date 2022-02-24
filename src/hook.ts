@@ -23,7 +23,7 @@ export const useStore = <S extends Store, RS extends State = any, RA extends Act
   const trackEffect = () => {
     if (updateCount === 0) {
       Store.tracksubscriber = updater
-      const s = mapStateToProps?.(context as unknown as PinkStoreState<S>)
+      const s = mapStateToProps?.(context.state)
       Store.tracksubscriber = null
       return s
     } else {

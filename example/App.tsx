@@ -15,18 +15,18 @@ const Header = () => {
 const ToDoList = () => {
   const store = useStore<typeof todoStore>({
     mapActionsToProps: (a) => a,
-    mapStateToProps: (s) => ({ toDoList: s.todoList })
+    mapStateToProps: (s) => ({ ...s })
   }) as any
 
   const handleToggle = (id) => {
-    let mapped = store.toDoList.map((task) => {
+    let mapped = store.todoList.map((task) => {
       return task.id === Number(id) ? { ...task, complete: !task.complete } : { ...task }
     })
     store.setToDoList(mapped)
   }
 
   const handleFilter = () => {
-    let filtered = store.toDoList.filter((task) => {
+    let filtered = store.todoList.filter((task) => {
       return !task.complete
     })
     store.setToDoList(filtered)
@@ -34,7 +34,7 @@ const ToDoList = () => {
 
   return (
     <div>
-      {store.toDoList.map((todo, i) => {
+      {store.todoList.map((todo, i) => {
         return <ToDo todo={todo} handleToggle={handleToggle} key={i} />
       })}
       <button style={{ margin: '20px' }} onClick={handleFilter}>
@@ -67,12 +67,12 @@ const ToDoForm = () => {
 
   const store = useStore<typeof todoStore>({
     mapActionsToProps: (a) => a,
-    mapStateToProps: (s) => ({ toDoList: s.todoList })
+    mapStateToProps: (s) => ({ ...s })
   }) as any
 
   const addTask = (userInput) => {
-    let copy = [...store.toDoList]
-    copy = [...copy, { id: store.toDoList.length + 1, task: userInput, complete: false }]
+    let copy = [...store.todoList]
+    copy = [...copy, { id: store.todoList.length + 1, task: userInput, complete: false }]
     store.setToDoList(copy)
   }
 
