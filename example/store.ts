@@ -111,3 +111,5 @@ export const todoStore = createStore({
     }
   }
 })
+
+export type TodoStoreValue = typeof todoStore

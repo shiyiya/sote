@@ -12,7 +12,11 @@ export type ConnectOptions<S, RS, RA> = {
   mapActionsToProps?: (actions: PinkStoreActions<S>) => RA
 }
 
-export const useStore = <S extends Store, RS extends State = any, RA extends Actions = any>({
+export const useStore = <
+  S extends Store<any, any> = Store<any, any>,
+  RS extends State = any,
+  RA extends Actions = any
+>({
   mapStateToProps,
   mapActionsToProps
 }: ConnectOptions<S, RS, RA>) => {
