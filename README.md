@@ -4,7 +4,7 @@ https://codesandbox.io/embed/nifty-sun-kenq35?theme=light
 
 ```tsx
 import React, { FC } from 'react'
-import { Provider, createStore, connect } from './sote'
+import { Provider, createStore, connect } from '../src'
 
 const s = createStore({
   state: {

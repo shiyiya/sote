@@ -21,6 +21,6 @@
     "allowSyntheticDefaultImports": true,
     "skipLibCheck": true
   },
-  "include": ["src/**/*"],
+  "include": ["./src/**/*", "./examples/**/*"],
   "exclude": ["node_modules", "**/__test__"]
 }
