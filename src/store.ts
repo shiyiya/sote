@@ -1,5 +1,5 @@
-import { Context } from 'react'
-import { isFunction } from './utils'
+import { unstable_batchedUpdates as batch } from 'react-dom'
+import { isFunction } from './utils/isFunction'
 
 export type State = Record<string | number | symbol, any>
 
@@ -18,7 +18,6 @@ export type PinkStoreActions<S> = S extends Store<any, infer T> ? T : never
 
 export class Store<S extends State = {}, A extends Actions = {}> {
   public static tracksubscriber: Subscriber | null = null
-  public static context: Context<any> | null = null
 
   public state: S
   public actions: A = {} as A
@@ -84,7 +83,7 @@ export class Store<S extends State = {}, A extends Actions = {}> {
   public lazyNotify(keys: Set<string>) {
     keys.forEach((key) => {
       const deps = this.effectDeps.get(key)
-      deps?.forEach((subscriber) => subscriber())
+      batch(() => deps?.forEach((subscriber) => subscriber()))
     })
   }
 }

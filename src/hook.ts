@@ -1,5 +1,6 @@
 import { useState, useContext, useEffect } from 'react'
 import { Store, State, Actions, PinkStoreState, PinkStoreActions } from './store'
+import { SoteContext, SoteContextValue } from './context'
 
 export const useUpdate = () => {
   const [state, setState] = useState(0)
@@ -15,10 +16,7 @@ export const useStore = <S extends Store, RS extends State = {}, RA extends Acti
   mapStateToProps,
   mapActionsToProps
 }: ConnectOptions<S, RS, RA>): RS & RA => {
-  const context = useContext(Store.context!)
-  if (!context) {
-    throw new Error('Store is not defined')
-  }
+  const context = useContext<SoteContextValue<PinkStoreState<S>, PinkStoreActions<S>>>(SoteContext)
 
   const [_state, up] = useUpdate()
 

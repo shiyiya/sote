@@ -1,19 +1,13 @@
-import React, { Context, PropsWithChildren, useRef } from 'react'
-import { Store } from './store'
+import React, { PropsWithChildren } from 'react'
+import { Store, Actions, State } from './store'
+import { SoteContext } from './context'
 
-type Props<T> = {
-  value: T
+type Props<S extends State = {}, A extends Actions = {}> = {
+  value: Store<S, A>
 }
 
-export const Provider = function <T>({ children, value }: PropsWithChildren<Props<T>>) {
-  const Context = useRef<Context<T>>(null as any)
+export const Provider = function ({ children, value }: PropsWithChildren<Props>) {
+  const Context = SoteContext
 
-  if (Context.current === null) {
-    Context.current = React.createContext<T>(null as any)
-    Store.context = Context.current
-  }
-
-  return (
-    Context.current && <Context.current.Provider value={value}>{children}</Context.current.Provider>
-  )
+  return <Context.Provider value={value}>{children}</Context.Provider>
 }
