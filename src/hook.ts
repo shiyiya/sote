@@ -8,33 +8,33 @@ export const useUpdate = () => {
 }
 
 export type ConnectOptions<S, RS, RA> = {
-  mapStateToProps: (state: PinkStoreState<S>) => RS
-  mapActionsToProps: (actions: PinkStoreActions<S>) => RA
+  mapStateToProps?: (state: PinkStoreState<S>) => RS
+  mapActionsToProps?: (actions: PinkStoreActions<S>) => RA
 }
 
-export const useStore = <S extends Store, RS extends State = {}, RA extends Actions = {}>({
+export const useStore = <S extends Store, RS extends State = any, RA extends Actions = any>({
   mapStateToProps,
   mapActionsToProps
-}: ConnectOptions<S, RS, RA>): RS & RA => {
+}: ConnectOptions<S, RS, RA>) => {
   const context = useContext<SoteContextValue<PinkStoreState<S>, PinkStoreActions<S>>>(SoteContext)
 
   const [updateCount, updater] = useUpdate()
 
-  const trackEffect = (): RS => {
+  const trackEffect = () => {
     if (updateCount === 0) {
       Store.tracksubscriber = updater
-      const s = mapStateToProps(context as unknown as PinkStoreState<S>)
+      const s = mapStateToProps?.(context as unknown as PinkStoreState<S>)
       Store.tracksubscriber = null
       return s
     } else {
-      return mapStateToProps(context.state)
+      return mapStateToProps?.(context.state)
     }
   }
 
   const store = {
     ...trackEffect(),
     ...mapActionsToProps?.(context.actions)
-  }
+  } as RS & RA
 
   useEffect(() => () => context.removeTrackedEffect(updater), [])
 

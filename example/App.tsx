@@ -12,10 +12,29 @@ const Header = () => {
   )
 }
 
-const ToDoList = ({ toDoList, handleToggle, handleFilter }) => {
+const ToDoList = () => {
+  const store = useStore<typeof todoStore>({
+    mapActionsToProps: (a) => a,
+    mapStateToProps: (s) => ({ toDoList: s.todoList })
+  }) as any
+
+  const handleToggle = (id) => {
+    let mapped = store.toDoList.map((task) => {
+      return task.id === Number(id) ? { ...task, complete: !task.complete } : { ...task }
+    })
+    store.setToDoList(mapped)
+  }
+
+  const handleFilter = () => {
+    let filtered = store.toDoList.filter((task) => {
+      return !task.complete
+    })
+    store.setToDoList(filtered)
+  }
+
   return (
     <div>
-      {toDoList.map((todo, i) => {
+      {store.toDoList.map((todo, i) => {
         return <ToDo todo={todo} handleToggle={handleToggle} key={i} />
       })}
       <button style={{ margin: '20px' }} onClick={handleFilter}>
@@ -43,8 +62,19 @@ const ToDo = ({ todo, handleToggle }) => {
   )
 }
 
-const ToDoForm = ({ addTask }) => {
+const ToDoForm = () => {
   const [userInput, setUserInput] = useState('')
+
+  const store = useStore<typeof todoStore>({
+    mapActionsToProps: (a) => a,
+    mapStateToProps: (s) => ({ toDoList: s.todoList })
+  }) as any
+
+  const addTask = (userInput) => {
+    let copy = [...store.toDoList]
+    copy = [...copy, { id: store.toDoList.length + 1, task: userInput, complete: false }]
+    store.setToDoList(copy)
+  }
 
   const handleChange = (e) => {
     setUserInput(e.currentTarget.value)
@@ -64,36 +94,11 @@ const ToDoForm = ({ addTask }) => {
 }
 
 function App() {
-  const store = useStore<typeof todoStore>({
-    mapActionsToProps: (a) => a,
-    mapStateToProps: (s) => ({ toDoList: s.todoList })
-  }) as any
-
-  const handleToggle = (id) => {
-    let mapped = store.toDoList.map((task) => {
-      return task.id === Number(id) ? { ...task, complete: !task.complete } : { ...task }
-    })
-    store.setToDoList(mapped)
-  }
-
-  const handleFilter = () => {
-    let filtered = store.toDoList.filter((task) => {
-      return !task.complete
-    })
-    store.setToDoList(filtered)
-  }
-
-  const addTask = (userInput) => {
-    let copy = [...store.toDoList]
-    copy = [...copy, { id: store.toDoList.length + 1, task: userInput, complete: false }]
-    store.setToDoList(copy)
-  }
-
   return (
     <div className="App">
       <Header />
-      <ToDoList toDoList={store.toDoList} handleToggle={handleToggle} handleFilter={handleFilter} />
-      <ToDoForm addTask={addTask} />
+      <ToDoList />
+      <ToDoForm />
     </div>
   )
 }

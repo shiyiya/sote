@@ -6,7 +6,7 @@
   "author": "",
   "scripts": {
     "clean": "rm -r dist .parcel-cache",
-    "start": "parcel watch example/index.html",
+    "start": "parcel example/index.html",
     "build-prod": "parcel build example/index.html"
   },
   "repository": {
