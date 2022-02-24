@@ -4,7 +4,7 @@ https://codesandbox.io/embed/nifty-sun-kenq35?theme=light
 
 ```tsx
 import React, { FC } from 'react'
-import { Provider, createStore, connect } from 'stoe'
+import { Provider, createStore, connect } from './sote'
 
 const s = createStore({
   state: {
@@ -12,11 +12,21 @@ const s = createStore({
     b: 2
   },
   actions: {
-    addb(n: number) {
+    setA(n: number) {
       this.a = n
     },
-    add() {
-      this.a += 1
+    addA() {
+      this.a++
+    },
+    addB() {
+      this.b++
+    },
+    setAAndB(n: number) {
+      // batch update
+      this.a = n
+      this.a++
+      this.b = n
+      this.b++
     }
   }
 })
@@ -26,33 +36,42 @@ const App: FC = connect({
     a: state.a
   }),
   mapActionsToProps: (actions) => ({
-    add: actions.add
+    add: actions.addA,
+    set: actions.setA,
+    setAAndB: actions.setAAndB
   })
 })((props) => {
   console.log('a rerender')
 
   return (
-    <div>
-      <button onClick={props.add}>Change {props.a}</button>
-    </div>
+    <>
+      <button onClick={props.add}>Add A {props.a}</button>
+      <br />
+      <button onClick={() => props.set(Math.floor(Math.random() * 100))}>Set A {props.a}</button>
+      <br />
+      <button onClick={() => props.setAAndB(Math.floor(Math.random() * 100))}>
+        Change A {`&`} B
+      </button>
+      <br />
+    </>
   )
 })
 
-const App2: FC = connect({
-  mapStateToProps: (s) => ({ b: s.b })
-  mapActionToProps: (a) => ({
-    add: a.addb
+const Bpp: FC = connect({
+  mapStateToProps: (s) => ({ b: s.b }),
+  mapActionsToProps: (a) => ({
+    add: a.addB
   })
 })((props) => {
   console.log('b rerender')
 
-  return <button onClick={props.add}>{props.b}</button>
+  return <button onClick={props.add}>ADD B {props.b}</button>
 })
 
 export default () => (
   <Provider value={s}>
     <App />
-    <App2 />
+    <Bpp />
   </Provider>
 )
 ```
