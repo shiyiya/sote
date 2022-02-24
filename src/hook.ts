@@ -3,8 +3,8 @@ import { Store, State, Actions, PinkStoreState, PinkStoreActions } from './store
 import { SoteContext, SoteContextValue } from './context'
 
 export const useUpdate = () => {
-  const [state, setState] = useState(0)
-  return [state, () => setState((state) => state + 1)] as const
+  const [updateCount, setUpdateCount] = useState(0)
+  return [updateCount, () => setUpdateCount((state) => (state += 1))] as const
 }
 
 export type ConnectOptions<S, RS, RA> = {
@@ -18,12 +18,12 @@ export const useStore = <S extends Store, RS extends State = {}, RA extends Acti
 }: ConnectOptions<S, RS, RA>): RS & RA => {
   const context = useContext<SoteContextValue<PinkStoreState<S>, PinkStoreActions<S>>>(SoteContext)
 
-  const [_state, up] = useUpdate()
+  const [updateCount, updater] = useUpdate()
 
   const trackEffect = (): RS => {
-    if (_state === 0) {
-      Store.tracksubscriber = up
-      const s = mapStateToProps(context as any)
+    if (updateCount === 0) {
+      Store.tracksubscriber = updater
+      const s = mapStateToProps(context as unknown as PinkStoreState<S>)
       Store.tracksubscriber = null
       return s
     } else {
@@ -36,11 +36,7 @@ export const useStore = <S extends Store, RS extends State = {}, RA extends Acti
     ...mapActionsToProps?.(context.actions)
   }
 
-  useEffect(() => {
-    context.subscribe(up)
-
-    return () => context.unsubscribe(up)
-  }, [])
+  useEffect(() => () => context.removeTrackedEffect(updater), [])
 
   return store
 }

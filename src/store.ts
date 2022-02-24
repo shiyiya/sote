@@ -21,10 +21,9 @@ export class Store<S extends State = {}, A extends Actions = {}> {
 
   public state: S
   public actions: A = {} as A
-  private subscriber: Subscriber[] = []
 
   private effectKeys = new Set<string>()
-  private effectDeps = new Map<any, Set<Function>>()
+  private effectDeps = new Map<string, Set<Function>>()
 
   constructor({ state, actions }: StoreOptions<S, A>) {
     this.state = isFunction(state) ? state() : state
@@ -33,20 +32,12 @@ export class Store<S extends State = {}, A extends Actions = {}> {
       Object.defineProperty(this, key, {
         get: () => {
           //todo: track all & deep
-          if (Store.tracksubscriber) {
-            let deps = this.effectDeps.get(key)
-            if (!deps) {
-              this.effectDeps.set(key, (deps = new Set()))
-            }
-
-            deps.add(Store.tracksubscriber)
-          }
+          this.trackEffect(key)
           return Reflect.get(this.state, key)
         },
         set: (value) => {
           if (value !== Reflect.get(this.state, key)) {
-            this.effectKeys.add(key)
-
+            this.trackKeys(key)
             return Reflect.set(this.state, key, value)
           }
 
@@ -58,29 +49,38 @@ export class Store<S extends State = {}, A extends Actions = {}> {
     for (const key in actions) {
       // @ts-ignore
       this.actions[key] = (...args: any[]) => {
-        actions?.[key].apply(this, args)
-        this.lazyNotify(this.effectKeys)
+        actions[key].apply(this, args)
+        this.notify(this.effectKeys)
         this.effectKeys.clear()
       }
     }
   }
 
-  public subscribe(subscriber: Subscriber) {
-    this.subscriber.push(subscriber)
-  }
+  public trackEffect(key: string) {
+    if (Store.tracksubscriber) {
+      let deps = this.effectDeps.get(key)
+      if (!deps) {
+        this.effectDeps.set(key, (deps = new Set()))
+      }
 
-  public unsubscribe(subscriber: Subscriber) {
-    const index = this.subscriber.indexOf(subscriber)
-    if (index > -1) {
-      this.subscriber.splice(index, 1)
+      deps.add(Store.tracksubscriber)
     }
   }
 
-  public notify() {
-    this.subscriber.forEach((subscriber) => subscriber())
+  public trackKeys(key: string) {
+    this.effectKeys.add(key)
   }
 
-  public lazyNotify(keys: Set<string>) {
+  public removeTrackedEffect(subscriber: Subscriber) {
+    this.effectDeps.forEach((deps, key) => {
+      deps.delete(subscriber)
+      if (deps.size === 0) {
+        this.effectDeps.delete(key)
+      }
+    })
+  }
+
+  public notify(keys: Set<string>) {
     keys.forEach((key) => {
       const deps = this.effectDeps.get(key)
       batch(() => deps?.forEach((subscriber) => subscriber()))
