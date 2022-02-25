@@ -1,7 +1,8 @@
 import React, { useState } from 'react'
 import ReactDOM from 'react-dom'
 import { useStore, Provider } from '../src'
-import { todoStore, TodoStoreValue } from './store'
+import { todoStore, TodoStoreValue, TodoStoreState, TodoStoreActions } from './store'
+
 import './index.css'
 
 const Header = () => {
@@ -13,10 +14,7 @@ const Header = () => {
 }
 
 const ToDoList = () => {
-  const store = useStore({
-    mapStateToProps: (s: TodoStoreValue['state']) => ({ ...s }),
-    mapActionsToProps: (a: TodoStoreValue['actions']) => a
-  })
+  const store = useStore<TodoStoreValue>() // subscribe all store
 
   const handleToggle = (id) => {
     let mapped = store.todoList.map((task) => {
@@ -65,9 +63,10 @@ const ToDo = ({ todo, handleToggle }) => {
 const ToDoForm = () => {
   const [userInput, setUserInput] = useState('')
 
+  // subscribe map store
   const store = useStore({
-    mapStateToProps: (a: TodoStoreValue['state']) => a,
-    mapActionsToProps: (s: TodoStoreValue['actions']) => ({ ...s })
+    mapStateToProps: (a: TodoStoreState) => a,
+    mapActionsToProps: (s: TodoStoreActions) => ({ ...s })
   })
 
   const addTask = (userInput) => {

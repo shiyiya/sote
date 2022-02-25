@@ -1,8 +1,8 @@
-import { useState, useContext, useEffect } from 'react'
+import { useState, useContext, useEffect, useMemo } from 'react'
 import { Store, State, Actions, PinkStoreState, PinkStoreActions } from './store'
 import { SoteContext, SoteContextValue } from './context'
 
-export const useUpdate = () => {
+export const useUpdater = () => {
   const [updateCount, setUpdateCount] = useState(0)
   return [updateCount, () => setUpdateCount((state) => (state += 1))] as const
 }
@@ -12,28 +12,39 @@ export type ConnectOptions<S, RS, RA> = {
   mapActionsToProps?: (actions: PinkStoreActions<S>) => RA
 }
 
-export const useStore = <
+export function useStore<S>(): PinkStoreState<S> & PinkStoreActions<S>
+
+export function useStore<
   S extends Store<any, any> = Store<any, any>,
   RS extends State = any,
   RA extends Actions = any
->({
-  mapStateToProps,
-  mapActionsToProps
-}: ConnectOptions<S, RS, RA>) => {
+>(options: ConnectOptions<S, RS, RA>): RS & RA
+
+export function useStore<
+  S extends Store<any, any> = Store<any, any>,
+  RS extends State = any,
+  RA extends Actions = any
+>(options?: ConnectOptions<S, RS, RA>): RS & RA {
+  const [updateCount, updater] = useUpdater()
   const context = useContext<SoteContextValue<PinkStoreState<S>, PinkStoreActions<S>>>(SoteContext)
-
-  const [updateCount, updater] = useUpdate()
-
-  const trackEffect = () => {
-    if (updateCount === 0) {
-      Store.tracksubscriber = updater
-      const s = mapStateToProps?.(context.state)
-      Store.tracksubscriber = null
-      return s
-    } else {
-      return mapStateToProps?.(context.state)
-    }
+  const { mapStateToProps, mapActionsToProps } = options || {
+    mapStateToProps: (state: PinkStoreState<S>) => ({ ...state }),
+    mapActionsToProps: (actions: PinkStoreActions<S>) => actions
   }
+
+  const trackEffect = useMemo(
+    () => () => {
+      if (updateCount === 0) {
+        Store.tracksubscriber = updater
+        const s = mapStateToProps?.(context.state)
+        Store.tracksubscriber = null
+        return s
+      } else {
+        return mapStateToProps?.(context.state)
+      }
+    },
+    []
+  )
 
   const store = {
     ...trackEffect(),

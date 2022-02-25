@@ -9,6 +9,7 @@ body {
 
 .todo {
   cursor: pointer;
+  user-select: none;
 }
 .strike {
   text-decoration: line-through;
