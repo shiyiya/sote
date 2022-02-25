@@ -30,13 +30,13 @@ type Action = typeof s.actions
 
 ```tsx
 import React, { FC } from 'react'
-import { Provider, createStore, connect } from '../src'
+import { Provider } from 'sote'
 
 const App: FC<State & Action> = ({ count, set, add }) => {
   return (
     <div>
       <h1>{count}</h1>
-      <button onClick={() => set(Math.floor(Math.random() * 100))}>reset</button>
+      <button onClick={() => set(0)}>reset</button>
       <button onClick={add}>add</button>
     </div>
   )
@@ -44,7 +44,7 @@ const App: FC<State & Action> = ({ count, set, add }) => {
 
 export default () => (
   <Provider value={s}>
-    <App />
+    <SoteApp />
   </Provider>
 )
 ```
@@ -53,14 +53,14 @@ export default () => (
 
 ```tsx
 import React, { FC } from 'react'
-import { useStore } from '../src'
+import { useStore } from 'sote'
 
 const SoteApp: FC = () => {
   // get store
   // const { count, add, set } = useStore<Store>()
 
   // get part of store
-  const { count, add, set } = useStore({
+  const store = useStore({
     mapStateToProps: (state: State) => ({
       count: state.count
     }),
@@ -70,13 +70,7 @@ const SoteApp: FC = () => {
     })
   })
 
-  return (
-    <div>
-      <h1>{count}</h1>
-      <button onClick={() => set(0))}>reset</button>
-      <button onClick={add}>add</button>
-    </div>
-  )
+  return <App {...store} />
 }
 ```
 
