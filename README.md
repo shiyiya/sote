@@ -1,77 +1,101 @@
-# Try It Online
+## Sote
 
-https://codesandbox.io/embed/nifty-sun-kenq35?theme=light
+[![CodeSandbox](https://img.shields.io/badge/Codesandbox-040404?style=for-the-badge&logo=codesandbox&logoColor=DBDBDB)](https://codesandbox.io/embed/nifty-sun-kenq35?theme=light)
+
+## Create Store
+
+```tsx
+import { createStore } from 'sote'
+
+const store = createStore({
+  state: {
+    count: 0
+  },
+  actions: {
+    set(n: number) {
+      this.count = n
+    },
+    add() {
+      this.count++
+    }
+  }
+})
+
+type Store = typeof s
+type State = typeof s.state
+type Action = typeof s.actions
+```
+
+## Inject Store
 
 ```tsx
 import React, { FC } from 'react'
 import { Provider, createStore, connect } from '../src'
 
-const s = createStore({
-  state: {
-    a: 1,
-    b: 2
-  },
-  actions: {
-    setA(n: number) {
-      this.a = n
-    },
-    addA() {
-      this.a++
-    },
-    addB() {
-      this.b++
-    },
-    setAAndB(n: number) {
-      // batch update
-      this.a = n
-      this.a++
-      this.b = n
-      this.b++
-    }
-  }
-})
-
-const App: FC = connect({
-  mapStateToProps: (state) => ({
-    a: state.a
-  }),
-  mapActionsToProps: (actions) => ({
-    add: actions.addA,
-    set: actions.setA,
-    setAAndB: actions.setAAndB
-  })
-})((props) => {
-  console.log('a rerender')
-
+const App: FC<State & Action> = ({ count, set, add }) => {
   return (
-    <>
-      <button onClick={props.add}>Add A {props.a}</button>
-      <br />
-      <button onClick={() => props.set(Math.floor(Math.random() * 100))}>Set A {props.a}</button>
-      <br />
-      <button onClick={() => props.setAAndB(Math.floor(Math.random() * 100))}>
-        Change A {`&`} B
-      </button>
-      <br />
-    </>
+    <div>
+      <h1>{count}</h1>
+      <button onClick={() => set(Math.floor(Math.random() * 100))}>reset</button>
+      <button onClick={add}>add</button>
+    </div>
   )
-})
-
-const Bpp: FC = connect({
-  mapStateToProps: (s) => ({ b: s.b }),
-  mapActionsToProps: (a) => ({
-    add: a.addB
-  })
-})((props) => {
-  console.log('b rerender')
-
-  return <button onClick={props.add}>ADD B {props.b}</button>
-})
+}
 
 export default () => (
   <Provider value={s}>
     <App />
-    <Bpp />
   </Provider>
 )
+```
+
+### useStore
+
+```tsx
+import React, { FC } from 'react'
+import { useStore } from '../src'
+
+const SoteApp: FC = () => {
+  // get store
+  // const { count, add, set } = useStore<Store>()
+
+  // get part of store
+  const { count, add, set } = useStore({
+    mapStateToProps: (state: State) => ({
+      count: state.count
+    }),
+    mapActionsToProps: (actions: Action) => ({
+      add: actions.add,
+      set: actions.set
+    })
+  })
+
+  return (
+    <div>
+      <h1>{count}</h1>
+      <button onClick={() => set(0))}>reset</button>
+      <button onClick={add}>add</button>
+    </div>
+  )
+}
+```
+
+### Connect
+
+```tsx
+import React, { FC } from 'react'
+
+// inject part of state and actions from mapStateToProps and mapDispatchToProps
+const SoteApp: FC = connect({
+  mapStateToProps: (state: State) => ({
+    count: state.count
+  }),
+  mapActionsToProps: (actions: Action) => ({
+    add: actions.add,
+    set: actions.set
+  })
+})(App)
+
+// inject all state and actions to App
+const SoteApp: FC = connect<Store>()(App)
 ```

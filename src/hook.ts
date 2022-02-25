@@ -12,19 +12,17 @@ export type ConnectOptions<S, RS, RA> = {
   mapActionsToProps?: (actions: PinkStoreActions<S>) => RA
 }
 
-export function useStore<S>(): PinkStoreState<S> & PinkStoreActions<S>
+export function useStore<S extends Store>(): PinkStoreState<S> & PinkStoreActions<S>
 
 export function useStore<
-  S extends Store<any, any> = Store<any, any>,
+  S extends Store = Store<any, any>,
   RS extends State = any,
   RA extends Actions = any
->(options: ConnectOptions<S, RS, RA>): RS & RA
+>(options?: ConnectOptions<S, RS, RA>): RS & RA
 
-export function useStore<
-  S extends Store<any, any> = Store<any, any>,
-  RS extends State = any,
-  RA extends Actions = any
->(options?: ConnectOptions<S, RS, RA>): RS & RA {
+export function useStore<S extends Store = Store, RS extends State = any, RA extends Actions = any>(
+  options?: ConnectOptions<S, RS, RA>
+): RS & RA {
   const [updateCount, updater] = useUpdater()
   const context = useContext<SoteContextValue<PinkStoreState<S>, PinkStoreActions<S>>>(SoteContext)
   const { mapStateToProps, mapActionsToProps } = options || {
