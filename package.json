@@ -4,10 +4,16 @@
   "description": "",
   "license": "MIT",
   "author": "",
+  "main": "./cjs/index.js",
+  "module": "./es/index.js",
+  "browser": "./umd/index.js",
   "scripts": {
-    "clean": "rm -r dist .parcel-cache",
+    "clean": "rm -rf cjs/* es/* umd/*",
     "start": "parcel example/index.html",
-    "build-prod": "parcel build example/index.html"
+    "build:cjs": "tsc -m commonjs --target es5 --outDir cjs",
+    "build:es": "tsc -m es6 --target es5 --outDir es",
+    "build:umd": "tsc -m umd --target es5 --outDir umd",
+    "build": "pnpm build:cjs && pnpm build:es && pnpm build:umd"
   },
   "repository": {
     "type": "git",

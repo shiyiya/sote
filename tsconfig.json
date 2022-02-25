@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "rootDir": "src/",
     "strict": true,
     "alwaysStrict": true,
     "module": "ES6",

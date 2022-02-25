@@ -11,3 +11,7 @@ yarn-error.log*
 node_modules/
 .parcel-cache
 dist/
+
+cjs
+es
+umd
