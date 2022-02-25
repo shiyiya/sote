@@ -65,8 +65,8 @@ const ToDoForm = () => {
 
   // subscribe map store
   const store = useStore({
-    mapStateToProps: (a: TodoStoreState) => a,
-    mapActionsToProps: (s: TodoStoreActions) => ({ ...s })
+    mapStateToProps: (a: TodoStoreState) => ({ ...a }),
+    mapActionsToProps: (s: TodoStoreActions) => s
   })
 
   const addTask = (userInput) => {
