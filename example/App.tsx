@@ -12,6 +12,7 @@ const Header = () => {
       done: s.todoList.filter((t) => t.complete).length
     })
   })
+
   return (
     <header>
       <h1>To Do List {done}</h1>

@@ -14,7 +14,7 @@ const effectKeys = new Set<EffectKey>()
 
 interface StoreOptions<S extends State = {}, A extends Actions = {}> {
   state: S
-  actions?: A
+  actions?: A & ThisType<S & A>
 }
 
 export class Store<S extends State = {}, A extends Actions = {}> {
@@ -27,20 +27,23 @@ export class Store<S extends State = {}, A extends Actions = {}> {
     const rawState = isFunction(state) ? state() : state
 
     this.state = new Proxy(rawState, {
-      get: (target, key) => {
+      get: (target, key, receiver) => {
         this.trackEffect(key)
-        return Reflect.get(target, key)
+        return Reflect.get(target, key, receiver)
+      },
+      set: (target, key, value, receiver) => {
+        if (value !== Reflect.get(this.state, key)) {
+          this.trackKey(key)
+          return Reflect.set(target, key, value, receiver)
+        }
+        return false
       }
     })
 
     Object.keys(this.state).forEach((key) => {
       Object.defineProperty(this, key, {
         set: (value) => {
-          if (value !== Reflect.get(this.state, key)) {
-            this.trackKeys(key)
-            return Reflect.set(this.state, key, value)
-          }
-          return false
+          return Reflect.set(this.state, key, value)
         },
         get: () => {
           return Reflect.get(this.state, key)
@@ -73,7 +76,7 @@ export class Store<S extends State = {}, A extends Actions = {}> {
     }
   }
 
-  public trackKeys(key: string | symbol) {
+  public trackKey(key: string | symbol) {
     effectKeys.add(key)
   }
 
@@ -91,6 +94,7 @@ export class Store<S extends State = {}, A extends Actions = {}> {
       effectKeys.forEach((key) => {
         effects.get(key)?.forEach((effect) => effect())
       })
+      effectKeys.clear()
     })
   }
 }

@@ -41,7 +41,7 @@ export function useStore<S extends Store = Store, RS extends State = any, RA ext
         return mapStateToProps?.(context.state)
       }
     },
-    []
+    [updateCount]
   )
 
   const store = {

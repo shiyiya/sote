@@ -112,11 +112,14 @@ export const todoStore = createStore({
     async waitAddToDo(task) {
       await new Promise((resolve) => setTimeout(resolve, 1000))
 
-      this.todoList.push({
-        id: this.todoList.length + 1,
-        task,
-        complete: false
-      })
+      this.todoList = [
+        {
+          id: this.todoList.length + 1,
+          task,
+          complete: false
+        },
+        ...this.todoList
+      ]
     },
     // next api
     waitRemoveToDo({ commit, props }) {
