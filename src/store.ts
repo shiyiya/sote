@@ -2,15 +2,13 @@ import { unstable_batchedUpdates as batch } from 'react-dom'
 import { isFunction, isPromise } from './utils'
 
 export type State = Record<string | number | symbol, any>
-
 export type Actions = Record<string, ((...arg: any[]) => void) | ((...arg: any[]) => Promise<void>)>
 
 type Effect = () => void
-
 type EffectKey = string | symbol
 
-const effects = new Map<EffectKey, Set<Effect>>()
 const effectKeys = new Set<EffectKey>()
+const effects = new Map<EffectKey, Set<Effect>>()
 
 interface StoreOptions<S extends State = {}, A extends Actions = {}> {
   state: S
@@ -18,10 +16,10 @@ interface StoreOptions<S extends State = {}, A extends Actions = {}> {
 }
 
 export class Store<S extends State = {}, A extends Actions = {}> {
-  public static Effect: Effect | null = null
-
   public state: S
   public actions = {} as A
+
+  public static Effect: Effect | null = null
 
   constructor({ state, actions }: StoreOptions<S, A>) {
     const rawState = isFunction(state) ? state() : state
@@ -40,6 +38,7 @@ export class Store<S extends State = {}, A extends Actions = {}> {
       }
     })
 
+    // proxy push pop shift unshift
     Object.keys(this.state).forEach((key) => {
       Object.defineProperty(this, key, {
         set: (value) => {
@@ -63,9 +62,17 @@ export class Store<S extends State = {}, A extends Actions = {}> {
         }
       }
     }
+
+    Object.keys(this.actions).forEach((key) => {
+      Object.defineProperty(this, key, {
+        get: () => {
+          return Reflect.get(this.actions, key)
+        }
+      })
+    })
   }
 
-  public trackEffect(key: string | symbol) {
+  private trackEffect(key: EffectKey) {
     if (Store.Effect) {
       let deps = effects.get(key)
       if (!deps) {
@@ -76,7 +83,7 @@ export class Store<S extends State = {}, A extends Actions = {}> {
     }
   }
 
-  public trackKey(key: string | symbol) {
+  private trackKey(key: EffectKey) {
     effectKeys.add(key)
   }
 
@@ -89,7 +96,7 @@ export class Store<S extends State = {}, A extends Actions = {}> {
     })
   }
 
-  public notify() {
+  private notify() {
     batch(() => {
       effectKeys.forEach((key) => {
         effects.get(key)?.forEach((effect) => effect())
