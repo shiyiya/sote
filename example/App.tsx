@@ -6,9 +6,15 @@ import { todoStore, TodoStoreValue, TodoStoreState, TodoStoreActions } from './s
 import './index.css'
 
 const Header = () => {
+  // getter
+  const { done } = useStore({
+    mapStateToProps: (s: TodoStoreState) => ({
+      done: s.todoList.filter((t) => t.complete).length
+    })
+  })
   return (
     <header>
-      <h1>To Do List</h1>
+      <h1>To Do List {done}</h1>
     </header>
   )
 }
@@ -84,10 +90,20 @@ const ToDoForm = () => {
     addTask(userInput)
     setUserInput('')
   }
+
+  const handleWaitSubmit = (e) => {
+    e.preventDefault()
+    store.waitAddToDo(userInput)
+    setUserInput('')
+  }
+
   return (
     <form onSubmit={handleSubmit}>
       <input value={userInput} type="text" onChange={handleChange} placeholder="Enter task..." />
-      <button>Submit</button>
+      <button type="submit">Submit</button>
+      <button type="button" onClick={handleWaitSubmit}>
+        Wait 1s submit
+      </button>
     </form>
   )
 }

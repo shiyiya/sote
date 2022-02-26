@@ -33,9 +33,9 @@ export function useStore<S extends Store = Store, RS extends State = any, RA ext
   const trackEffect = useMemo(
     () => () => {
       if (updateCount === 0) {
-        Store.tracksubscriber = updater
+        Store.Effect = updater
         const s = mapStateToProps?.(context.state)
-        Store.tracksubscriber = null
+        Store.Effect = null
         return s
       } else {
         return mapStateToProps?.(context.state)

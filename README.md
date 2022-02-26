@@ -18,12 +18,16 @@ const store = createStore({
     add() {
       this.count++
     }
+    async addAsync() {
+      await new Promise(resolve => setTimeout(resolve, 1000))
+      this.count++
+    }
   }
 })
 
-type Store = typeof s
-type State = typeof s.state
-type Action = typeof s.actions
+type Store = typeof store
+type State = typeof store.state
+type Action = typeof store.actions
 ```
 
 ## Inject Store
@@ -32,12 +36,13 @@ type Action = typeof s.actions
 import React, { FC } from 'react'
 import { Provider } from 'sote'
 
-const App: FC<State & Action> = ({ count, set, add }) => {
+const App: FC<State & Action> = ({ count, set, add, addAsync }) => {
   return (
     <div>
       <h1>{count}</h1>
       <button onClick={() => set(0)}>reset</button>
       <button onClick={add}>add</button>
+      <button onClick={addAsync}>addAsync</button>
     </div>
   )
 }
@@ -67,6 +72,7 @@ const SoteApp: FC = () => {
     mapActionsToProps: (actions: Action) => ({
       add: actions.add,
       set: actions.set
+      addAsync: actions.addAsync
     })
   })
 
@@ -87,6 +93,7 @@ const SoteApp: FC = connect({
   mapActionsToProps: (actions: Action) => ({
     add: actions.add,
     set: actions.set
+    addAsync: actions.addAsync
   })
 })(App)
 
