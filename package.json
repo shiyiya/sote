@@ -1,12 +1,18 @@
 {
-  "name": "sote",
-  "version": "1.0.0",
-  "description": "",
+  "name": "@bylin/sote",
+  "version": "0.0.1-dev",
+  "description": "Tiny state manager for react",
   "license": "MIT",
   "author": "",
   "main": "./cjs/index.js",
   "module": "./es/index.js",
   "browser": "./umd/index.js",
+  "types": "./cjs/index.d.ts",
+  "files": [
+    "/cjs",
+    "/es",
+    "/umd"
+  ],
   "scripts": {
     "clean": "rm -rf cjs/* es/* umd/*",
     "start": "parcel example/index.html",

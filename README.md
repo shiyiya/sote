@@ -2,6 +2,10 @@
 
 [![CodeSandbox](https://img.shields.io/badge/Codesandbox-040404?style=for-the-badge&logo=codesandbox&logoColor=DBDBDB)](https://codesandbox.io/embed/nifty-sun-kenq35?theme=light)
 
+```shell
+pnpm i @bylin/sote
+```
+
 ## Create Store
 
 ```tsx
