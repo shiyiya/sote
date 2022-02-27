@@ -70,10 +70,10 @@ const SoteApp: FC = () => {
 
   // get part of store
   const store = useStore({
-    mapStateToProps: (state: State) => ({
+    mapState: (state: State) => ({
       count: state.count
     }),
-    mapActionsToProps: (actions: Action) => ({
+    mapActions: (actions: Action) => ({
       add: actions.add,
       set: actions.set
       addAsync: actions.addAsync
@@ -89,12 +89,12 @@ const SoteApp: FC = () => {
 ```tsx
 import React, { FC } from 'react'
 
-// inject part of state and actions from mapStateToProps and mapDispatchToProps
+// inject part of state and actions from mapState and mapDispatch
 const SoteApp: FC = connect({
-  mapStateToProps: (state: State) => ({
+  mapState: (state: State) => ({
     count: state.count
   }),
-  mapActionsToProps: (actions: Action) => ({
+  mapActions: (actions: Action) => ({
     add: actions.add,
     set: actions.set
     addAsync: actions.addAsync

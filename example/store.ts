@@ -108,6 +108,7 @@ export const todoStore = createStore({
   actions: {
     setToDoList(todoList) {
       this.todoList = todoList
+      this.todoList[0].task = 'test'
     },
     async waitAddToDo(task) {
       await new Promise((resolve) => setTimeout(resolve, 1000))

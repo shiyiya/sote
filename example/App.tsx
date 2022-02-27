@@ -8,7 +8,7 @@ import './index.css'
 const Header = () => {
   // getter
   const { done } = useStore({
-    mapStateToProps: (s: TodoStoreState) => ({
+    mapState: (s: TodoStoreState) => ({
       done: s.todoList.filter((t) => t.complete).length
     })
   })
@@ -72,8 +72,8 @@ const ToDoForm = () => {
 
   // subscribe map store
   const store = useStore({
-    mapStateToProps: (a: TodoStoreState) => ({ ...a }),
-    mapActionsToProps: (s: TodoStoreActions) => s
+    mapState: (a: TodoStoreState) => ({ ...a }),
+    mapActions: (s: TodoStoreActions) => s
   })
 
   const addTask = (userInput) => {

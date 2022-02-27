@@ -8,11 +8,11 @@ export const useUpdater = () => {
 }
 
 export type ConnectOptions<S, RS, RA> = {
-  mapStateToProps?: (state: PinkStoreState<S>) => RS
-  mapActionsToProps?: (actions: PinkStoreActions<S>) => RA
+  mapState?: (state: PinkStoreState<S>) => RS
+  mapActions?: (actions: PinkStoreActions<S>) => RA
 }
 
-export function useStore<S extends Store>(): PinkStoreState<S> & PinkStoreActions<S>
+export function useStore<S extends Store>(): S['state'] & S['actions']
 
 export function useStore<
   S extends Store = Store<any, any>,
@@ -25,20 +25,20 @@ export function useStore<S extends Store = Store, RS extends State = any, RA ext
 ): RS & RA {
   const [updateCount, updater] = useUpdater()
   const context = useContext<SoteContextValue<PinkStoreState<S>, PinkStoreActions<S>>>(SoteContext)
-  const { mapStateToProps, mapActionsToProps } = options || {
-    mapStateToProps: (state: PinkStoreState<S>) => ({ ...state }),
-    mapActionsToProps: (actions: PinkStoreActions<S>) => actions
+  const { mapState, mapActions } = options || {
+    mapState: (state: PinkStoreState<S>) => ({ ...state }),
+    mapActions: (actions: PinkStoreActions<S>) => actions
   }
 
   const trackEffect = useMemo(
     () => () => {
       if (updateCount === 0) {
         Store.Effect = updater
-        const s = mapStateToProps?.(context.state)
+        const s = mapState?.(context.state)
         Store.Effect = null
         return s
       } else {
-        return mapStateToProps?.(context.state)
+        return mapState?.(context.state)
       }
     },
     [updateCount]
@@ -46,7 +46,7 @@ export function useStore<S extends Store = Store, RS extends State = any, RA ext
 
   const store = {
     ...trackEffect(),
-    ...mapActionsToProps?.(context.actions)
+    ...mapActions?.(context.actions)
   } as RS & RA
 
   useEffect(() => () => context.removeTrackedEffect(updater), [])
