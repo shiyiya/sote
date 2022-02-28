@@ -1,7 +1,10 @@
 import { unstable_batchedUpdates as batch } from 'react-dom'
 import { isFunction, isPromise } from './utils'
 
-export type State = Record<string | number | symbol, any>
+export type State =
+  | Record<string | number | symbol, any>
+  | (() => Record<string | number | symbol, any>)
+
 export type Actions = Record<string, ((...arg: any[]) => void) | ((...arg: any[]) => Promise<void>)>
 
 type Effect = () => void
@@ -24,19 +27,26 @@ export class Store<S extends State = {}, A extends Actions = {}> {
   constructor({ state, actions }: StoreOptions<S, A>) {
     const rawState = isFunction(state) ? state() : state
 
-    this.state = new Proxy(rawState, {
-      get: (target, key, receiver) => {
-        this.trackEffect(key)
-        return Reflect.get(target, key, receiver)
-      },
-      set: (target, key, value, receiver) => {
-        if (value !== Reflect.get(this.state, key)) {
-          this.trackKey(key)
-          return Reflect.set(target, key, value, receiver)
-        }
-        return false
-      }
-    })
+    this.state = this.reactify(rawState)
+
+    this.proxyState(rawState)
+    this.proxyActions(actions as A)
+  }
+
+  private proxyState(state: any) {
+    // this.state = new Proxy(state, {
+    //   get: (target, key, receiver) => {
+    //     this.trackEffect(key)
+    //     return Reflect.get(target, key, receiver)
+    //   },
+    //   set: (target, key, value, receiver) => {
+    //     if (value !== Reflect.get(this.state, key)) {
+    //       this.trackKey(key)
+    //       return Reflect.set(target, key, value, receiver)
+    //     }
+    //     return false
+    //   }
+    // })
 
     // proxy push pop shift unshift
     Object.keys(this.state).forEach((key) => {
@@ -49,7 +59,9 @@ export class Store<S extends State = {}, A extends Actions = {}> {
         }
       })
     })
+  }
 
+  private proxyActions(actions: A) {
     for (const key in actions) {
       // @ts-ignore
       this.actions[key] = (...args: any[]) => {
@@ -72,8 +84,30 @@ export class Store<S extends State = {}, A extends Actions = {}> {
     })
   }
 
-  private trackEffect(key: EffectKey) {
+  private reactify(obj: any, path = '') {
+    return new Proxy(obj, {
+      get: (target, key, receiver) => {
+        if (typeof obj[key] === 'object' && obj[key] !== null) {
+          //todo poxy.ts
+          return this.reactify(obj[key], path + '.' + `${String(key)}`)
+        }
+
+        this.trackEffect(path)
+        return Reflect.get(target, key, receiver)
+      },
+      set: (target, key, value, receiver) => {
+        if (value !== Reflect.get(this.state, key)) {
+          this.trackKey(key)
+          return Reflect.set(target, key, value, receiver)
+        }
+        return false
+      }
+    })
+  }
+
+  private trackEffect(path: EffectKey) {
     if (Store.Effect) {
+      const key = path.toString().substring(1)
       let deps = effects.get(key)
       if (!deps) {
         effects.set(key, (deps = new Set()))
