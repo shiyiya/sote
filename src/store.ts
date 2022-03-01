@@ -1,5 +1,5 @@
 import { unstable_batchedUpdates as batch } from 'react-dom'
-import { isFunction, isPromise } from './utils'
+import { isFunction, isObject, isPromise } from './utils'
 
 export type State =
   | Record<string | number | symbol, any>
@@ -8,7 +8,9 @@ export type State =
 export type Actions = Record<string, ((...arg: any[]) => void) | ((...arg: any[]) => Promise<void>)>
 
 type Effect = () => void
-type EffectKey = string | symbol
+type EffectKey = string
+
+const copy = new Map<any, any>()
 
 const effectKeys = new Set<EffectKey>()
 const effects = new Map<EffectKey, Set<Effect>>()
@@ -28,35 +30,57 @@ export class Store<S extends State = {}, A extends Actions = {}> {
     const rawState = isFunction(state) ? state() : state
 
     this.state = this.reactify(rawState)
-
     this.proxyState(rawState)
     this.proxyActions(actions as A)
   }
 
-  private proxyState(state: any) {
-    // this.state = new Proxy(state, {
-    //   get: (target, key, receiver) => {
-    //     this.trackEffect(key)
-    //     return Reflect.get(target, key, receiver)
-    //   },
-    //   set: (target, key, value, receiver) => {
-    //     if (value !== Reflect.get(this.state, key)) {
-    //       this.trackKey(key)
-    //       return Reflect.set(target, key, value, receiver)
-    //     }
-    //     return false
-    //   }
-    // })
+  private reactify(state: any, path = '') {
+    return new Proxy(state, {
+      get: (target, key, receiver) => {
+        const fullKey = path + '.' + key.toString()
 
-    // proxy push pop shift unshift
-    Object.keys(this.state).forEach((key) => {
+        if (Object.hasOwnProperty.call(target, key)) {
+          if (copy.has(fullKey)) return copy.get(fullKey)
+
+          this.trackEffect(fullKey)
+
+          if (isObject(target[key])) {
+            const p = this.reactify(state[key], fullKey)
+            return copy.set(key, p), p
+          }
+        }
+
+        return Reflect.get(target, key, receiver)
+      },
+      set: (target, key, value, receiver) => {
+        if (value == target[key] && key !== 'length') return false
+
+        const fullKey = path + '.' + key.toString()
+
+        this.trackKey(fullKey.substring(1))
+
+        if (isObject(target[key])) {
+          copy.delete(fullKey)
+
+          value = this.reactify(value, fullKey)
+        }
+
+        return Reflect.set(target, key, value, receiver)
+      }
+    })
+  }
+
+  private proxyState(state: S) {
+    Object.keys(state).forEach((key) => {
       Object.defineProperty(this, key, {
         set: (value) => {
-          return Reflect.set(this.state, key, value)
+          this.state[key] = value
         },
         get: () => {
-          return Reflect.get(this.state, key)
-        }
+          return this.state[key]
+        },
+        configurable: true,
+        enumerable: true
       })
     })
   }
@@ -81,27 +105,6 @@ export class Store<S extends State = {}, A extends Actions = {}> {
           return Reflect.get(this.actions, key)
         }
       })
-    })
-  }
-
-  private reactify(obj: any, path = '') {
-    return new Proxy(obj, {
-      get: (target, key, receiver) => {
-        if (typeof obj[key] === 'object' && obj[key] !== null) {
-          //todo poxy.ts
-          return this.reactify(obj[key], path + '.' + `${String(key)}`)
-        }
-
-        this.trackEffect(path)
-        return Reflect.get(target, key, receiver)
-      },
-      set: (target, key, value, receiver) => {
-        if (value !== Reflect.get(this.state, key)) {
-          this.trackKey(key)
-          return Reflect.set(target, key, value, receiver)
-        }
-        return false
-      }
     })
   }
 
@@ -132,9 +135,16 @@ export class Store<S extends State = {}, A extends Actions = {}> {
 
   private notify() {
     batch(() => {
-      effectKeys.forEach((key) => {
-        effects.get(key)?.forEach((effect) => effect())
-      })
+      Array.from(effectKeys)
+        .map((key) => {
+          return key.split('.')[0]
+        })
+        .forEach((key) => {
+          effects.get(key)?.forEach((effect) => {
+            effect()
+          })
+        })
+
       effectKeys.clear()
     })
   }

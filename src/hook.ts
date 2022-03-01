@@ -1,4 +1,4 @@
-import { useState, useContext, useEffect, useMemo } from 'react'
+import { useState, useContext, useEffect } from 'react'
 import { Store, State, Actions, PinkStoreState, PinkStoreActions } from './store'
 import { SoteContext, SoteContextValue } from './context'
 
@@ -30,19 +30,16 @@ export function useStore<S extends Store = Store, RS extends State = any, RA ext
     mapActions: (actions: PinkStoreActions<S>) => actions
   }
 
-  const trackEffect = useMemo(
-    () => () => {
-      if (updateCount === 0) {
-        Store.Effect = updater
-        const s = mapState?.(context.state)
-        Store.Effect = null
-        return s
-      } else {
-        return mapState?.(context.state)
-      }
-    },
-    [updateCount]
-  )
+  const trackEffect = () => {
+    if (updateCount === 0) {
+      Store.Effect = updater
+      const s = mapState?.(context.state)
+      Store.Effect = null
+      return s
+    } else {
+      return mapState?.(context.state)
+    }
+  }
 
   const store = {
     ...trackEffect(),

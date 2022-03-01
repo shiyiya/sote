@@ -6,12 +6,14 @@ import { todoStore, TodoStoreValue, TodoStoreState, TodoStoreActions } from './s
 import './index.css'
 
 const Header = () => {
-  // getter
+  // getter // todo
   const { done } = useStore({
     mapState: (s: TodoStoreState) => ({
       done: s.todoList.filter((t) => t.complete).length
     })
   })
+
+  console.log('Header render')
 
   return (
     <header>
@@ -37,6 +39,8 @@ const ToDoList = () => {
     store.setToDoList(filtered)
   }
 
+  console.log('ToDoList render')
+
   return (
     <div>
       {store.todoList.map((todo, i) => {
@@ -55,6 +59,8 @@ const ToDo = ({ todo, handleToggle }) => {
     handleToggle(e.currentTarget.id)
   }
 
+  console.log('ToDo render', todo.id)
+
   return (
     <div
       id={todo.id}
@@ -72,14 +78,16 @@ const ToDoForm = () => {
 
   // subscribe map store
   const store = useStore({
-    mapState: (a: TodoStoreState) => ({ ...a }),
-    mapActions: (s: TodoStoreActions) => s
+    mapState: (s: TodoStoreState) => ({ ...s }),
+    mapActions: (a: TodoStoreActions) => a
   })
 
   const addTask = (userInput) => {
-    let copy = [...store.todoList]
-    copy = [...copy, { id: store.todoList.length + 1, task: userInput, complete: false }]
-    store.setToDoList(copy)
+    const copy = [
+      ...store.todoList,
+      { id: store.todoList.length + 1, task: userInput, complete: false }
+    ]
+    store.addToDo({ id: store.todoList.length + 1, task: userInput, complete: false })
   }
 
   const handleChange = (e) => {
@@ -98,6 +106,8 @@ const ToDoForm = () => {
     setUserInput('')
   }
 
+  console.log('ToDoForm render')
+
   return (
     <form onSubmit={handleSubmit}>
       <input value={userInput} type="text" onChange={handleChange} placeholder="Enter task..." />
@@ -112,7 +122,7 @@ const ToDoForm = () => {
 function App() {
   return (
     <div className="App">
-      <Header />
+      {/* <Header /> */}
       <ToDoList />
       <ToDoForm />
     </div>
