@@ -104,8 +104,17 @@ const rawTodoList = [
 ]
 
 export const todoStore = createStore({
-  state: { todoList: rawTodoList },
+  state: {
+    todoList: rawTodoList,
+    date: {
+      time: new Date().toLocaleTimeString()
+    }
+  },
   actions: {
+    updateTime() {
+      console.clear()
+      this.date.time = new Date().toLocaleTimeString()
+    },
     setToDoList(todoList) {
       this.todoList = todoList
     },

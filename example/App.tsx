@@ -7,9 +7,13 @@ import './index.css'
 
 const Header = () => {
   // getter // todo
-  const { done } = useStore({
+  const { time, updateTime } = useStore({
     mapState: (s: TodoStoreState) => ({
-      done: s.todoList.filter((t) => t.complete).length
+      // done: s.todoList.filter((t) => t.complete).length
+      time: s.date.time
+    }),
+    mapActions: (a: TodoStoreActions) => ({
+      updateTime: a.updateTime
     })
   })
 
@@ -17,13 +21,17 @@ const Header = () => {
 
   return (
     <header>
-      <h1>To Do List {done}</h1>
+      <h1>To Do List</h1>
+      <p onClick={updateTime}>{time}</p>
     </header>
   )
 }
 
 const ToDoList = () => {
-  const store = useStore<TodoStoreValue>() // subscribe all store
+  const store = useStore({
+    mapState: (s: TodoStoreState) => ({ todoList: s.todoList }),
+    mapActions: (a: TodoStoreActions) => a
+  })
 
   const handleToggle = (id) => {
     let mapped = store.todoList.map((task) => {
@@ -59,8 +67,6 @@ const ToDo = ({ todo, handleToggle }) => {
     handleToggle(e.currentTarget.id)
   }
 
-  console.log('ToDo render', todo.id)
-
   return (
     <div
       id={todo.id}
@@ -78,7 +84,7 @@ const ToDoForm = () => {
 
   // subscribe map store
   const store = useStore({
-    mapState: (s: TodoStoreState) => ({ ...s }),
+    mapState: (s: TodoStoreState) => ({ todoList: s.todoList }),
     mapActions: (a: TodoStoreActions) => a
   })
 
@@ -122,7 +128,7 @@ const ToDoForm = () => {
 function App() {
   return (
     <div className="App">
-      {/* <Header /> */}
+      <Header />
       <ToDoList />
       <ToDoForm />
     </div>
