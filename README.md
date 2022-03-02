@@ -6,6 +6,22 @@
 pnpm i @bylin/sote
 ```
 
+```ts
+
+/**
+ *  @getter 收集路径: 使用最短路径 TODO
+ * - state -> state.count
+ * - state -> state.count -> state.count.a
+ *
+ *  @setter 更新路径: 使用最长路径 DONE
+ * - state.count.a 变了 state.count 也会变
+ **/
+mapState: (state: State) => ({
+  count: state.count
+  a: state.count.a
+})
+```
+
 ## Create Store
 
 ```tsx

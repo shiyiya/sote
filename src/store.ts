@@ -53,13 +53,22 @@ export class Store<S extends State = {}, A extends Actions = {}> {
         return Reflect.get(target, key, receiver)
       },
       set: (target, key, value, receiver) => {
-        if (value == target[key] && key !== 'length') return false
+        const targetValue = target[key]
+
+        if (value == targetValue && key !== 'length') {
+          return false
+        }
 
         const fullKey = path + '.' + key.toString()
 
-        this.trackKey(fullKey.substring(1))
+        if (key === 'length' || Array.isArray(target)) {
+          // push pop shift unshift
+          this.trackKey(path.substring(1))
+        } else {
+          this.trackKey(fullKey.substring(1))
+        }
 
-        if (isObject(target[key])) {
+        if (isObject(targetValue)) {
           copy.delete(fullKey)
 
           value = this.reactify(value, fullKey)
@@ -135,15 +144,11 @@ export class Store<S extends State = {}, A extends Actions = {}> {
 
   private notify() {
     batch(() => {
-      Array.from(effectKeys)
-        .map((key) => {
-          return key.split('.')[0]
+      effectKeys.forEach((key) => {
+        effects.get(key)?.forEach((effect) => {
+          effect()
         })
-        .forEach((key) => {
-          effects.get(key)?.forEach((effect) => {
-            effect()
-          })
-        })
+      })
 
       effectKeys.clear()
     })
