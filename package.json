@@ -1,6 +1,6 @@
 {
   "name": "@bylin/sote",
-  "version": "0.0.1-dev",
+  "version": "0.0.1-dev.1",
   "description": "Tiny state manager for react",
   "license": "MIT",
   "author": "",
@@ -19,7 +19,8 @@
     "build:cjs": "tsc -m commonjs --target es5 --outDir cjs",
     "build:es": "tsc -m es6 --target es5 --outDir es",
     "build:umd": "tsc -m umd --target es5 --outDir umd",
-    "build": "pnpm build:cjs && pnpm build:es && pnpm build:umd"
+    "build": "pnpm build:cjs && pnpm build:es && pnpm build:umd",
+    "prepublish": "pnpm run build && npm publish"
   },
   "repository": {
     "type": "git",
