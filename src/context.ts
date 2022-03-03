@@ -5,4 +5,8 @@ export type SoteContextValue<S extends State = any, A extends Actions = any> = S
 
 export const SoteContext = /*#__PURE__*/ React.createContext<SoteContextValue>(null as any)
 
+if (process.env.NODE_ENV !== 'production') {
+  SoteContext.displayName = 'Sote'
+}
+
 export type SoteContextInstance = typeof SoteContext

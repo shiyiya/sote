@@ -21,6 +21,12 @@ export function connect<
     (...props) => {
       const store = useStore(options)
 
+      if (process.env.NODE_ENV !== 'production') {
+        WrappedComponent.displayName = `Connect(${
+          WrappedComponent.displayName || WrappedComponent.name || 'Component'
+        })`
+      }
+
       return <WrappedComponent {...store} {...props} />
     }
 }
