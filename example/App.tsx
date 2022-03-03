@@ -1,22 +1,18 @@
 import React, { useState } from 'react'
 import ReactDOM from 'react-dom'
-import { useStore, Provider } from '../src'
+import { useStore, Provider, connect } from '../src'
 import { todoStore, TodoStoreValue, TodoStoreState, TodoStoreActions } from './store'
 
 import './index.css'
 
-const Header = () => {
-  // getter // todo
-  const { time, updateTime } = useStore({
-    mapState: (s: TodoStoreState) => ({
-      // done: s.todoList.filter((t) => t.complete).length
-      time: s.date.time
-    }),
-    mapActions: (a: TodoStoreActions) => ({
-      updateTime: a.updateTime
-    })
+const Header = connect({
+  mapState: (s: TodoStoreState) => ({
+    time: s.date.time
+  }),
+  mapActions: (a: TodoStoreActions) => ({
+    updateTime: a.updateTime
   })
-
+})(({ time, updateTime }) => {
   console.log('Header render')
 
   return (
@@ -25,7 +21,7 @@ const Header = () => {
       <p onClick={updateTime}>{time}</p>
     </header>
   )
-}
+})
 
 const ToDoList = () => {
   const store = useStore({
