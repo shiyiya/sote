@@ -89,9 +89,7 @@ export class Store<S extends State = {}, A extends Actions = {}> {
         },
         get: () => {
           return this.state[key]
-        },
-        configurable: true,
-        enumerable: true
+        }
       })
     })
   }
