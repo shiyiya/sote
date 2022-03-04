@@ -57,7 +57,7 @@ export class Store<S extends State = {}, A extends Actions = {}> {
         const targetValue = target[key]
 
         if (value === targetValue && key !== 'length') {
-          return false
+          return true
         }
 
         const fullKey = path + '.' + key.toString()
@@ -122,31 +122,27 @@ export class Store<S extends State = {}, A extends Actions = {}> {
     if (Store.Effect) {
       const key = path.toString().substring(1)
 
-      let keys = EFFECT_KEYS.get(Store.Effect)
-      if (!keys) {
-        EFFECT_KEYS.set(Store.Effect, (keys = new Set()))
+      if (!EFFECT_KEYS.get(Store.Effect)) {
+        EFFECT_KEYS.set(Store.Effect, new Set())
       }
+      EFFECT_KEYS.get(Store.Effect)!.add(key)
 
-      let deps = EFFECT_MAP.get(key)
-      if (!deps) {
-        EFFECT_MAP.set(key, (deps = new Set()))
+      if (!EFFECT_MAP.get(key)) {
+        EFFECT_MAP.set(key, new Set())
       }
-      EFFECT_KEYS.get(Store.Effect)?.add(key)
+      EFFECT_MAP.get(key)!.add(Store.Effect)
 
       const chunkPath = key.split('.')
-      while (chunkPath.length) {
+      while (chunkPath.length > 1) {
         chunkPath.pop()
-        const depKey = chunkPath.toString()
+        const prevKey = chunkPath.toString()
 
-        if (EFFECT_KEYS.get(Store.Effect)?.has(depKey) && depKey != '') {
-          EFFECT_KEYS.get(Store.Effect)?.delete(depKey)
-          EFFECT_MAP.get(depKey)?.delete(Store.Effect)
-          if (EFFECT_MAP.get(depKey)?.size === 0) {
-            EFFECT_MAP.delete(depKey)
+        if (EFFECT_KEYS.get(Store.Effect)?.has(prevKey)) {
+          EFFECT_KEYS.get(Store.Effect)?.delete(prevKey)
+          EFFECT_MAP.get(prevKey)?.delete(Store.Effect)
+          if (EFFECT_MAP.get(prevKey)?.size === 0) {
+            EFFECT_MAP.delete(prevKey)
           }
-          EFFECT_MAP.get(key)?.add(Store.Effect)
-        } else {
-          EFFECT_MAP.get(key)?.add(Store.Effect)
         }
       }
     }
