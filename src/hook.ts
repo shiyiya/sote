@@ -1,4 +1,4 @@
-import { useState, useContext, useEffect } from 'react'
+import { useState, useContext, useEffect, useMemo } from 'react'
 import { Store, State, Actions, PinkStoreState, PinkStoreActions } from './store'
 import { SoteContext, SoteContextValue } from './context'
 
@@ -43,7 +43,7 @@ export function useStore<S extends Store = Store, RS extends State = any, RA ext
 
   const store = {
     ...trackEffect(),
-    ...mapActions?.(context.actions)
+    ...useMemo(() => mapActions?.(context.actions), [mapActions])
   } as RS & RA
 
   useEffect(() => () => context.removeTrackedEffect(updater), [])
