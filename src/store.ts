@@ -8,13 +8,14 @@ export type State =
 export type Actions = Record<string, ((...arg: any[]) => void) | ((...arg: any[]) => Promise<void>)>
 
 type Effect = () => void
-type EffectKey = string
+type EffectKey = string | number | symbol
 
-const copy = new Map<any, any>()
+const copy = new Map<EffectKey, any>()
 
-const EFFECT_SETTER_KEYS = new Set<EffectKey>()
-const EFFECT_MAP = new Map<EffectKey, Set<Effect>>()
-const EFFECT_KEYS = new Map<Effect, Set<EffectKey>>()
+const KeyEffects = new Map<EffectKey, Set<Effect>>()
+const EffectKeys = new Map<Effect, Set<EffectKey>>()
+
+const EffectSetterKeys = new Set<EffectKey>()
 
 interface StoreOptions<S extends State = {}, A extends Actions = {}> {
   state: S
@@ -122,26 +123,26 @@ export class Store<S extends State = {}, A extends Actions = {}> {
     if (Store.Effect) {
       const key = path.toString().substring(1)
 
-      if (!EFFECT_KEYS.get(Store.Effect)) {
-        EFFECT_KEYS.set(Store.Effect, new Set())
+      if (!EffectKeys.get(Store.Effect)) {
+        EffectKeys.set(Store.Effect, new Set())
       }
-      EFFECT_KEYS.get(Store.Effect)!.add(key)
+      EffectKeys.get(Store.Effect)!.add(key)
 
-      if (!EFFECT_MAP.get(key)) {
-        EFFECT_MAP.set(key, new Set())
+      if (!KeyEffects.get(key)) {
+        KeyEffects.set(key, new Set())
       }
-      EFFECT_MAP.get(key)!.add(Store.Effect)
+      KeyEffects.get(key)!.add(Store.Effect)
 
       const chunkPath = key.split('.')
       while (chunkPath.length > 1) {
         chunkPath.pop()
         const prevKey = chunkPath.toString()
 
-        if (EFFECT_KEYS.get(Store.Effect)?.has(prevKey)) {
-          EFFECT_KEYS.get(Store.Effect)?.delete(prevKey)
-          EFFECT_MAP.get(prevKey)?.delete(Store.Effect)
-          if (EFFECT_MAP.get(prevKey)?.size === 0) {
-            EFFECT_MAP.delete(prevKey)
+        if (EffectKeys.get(Store.Effect)?.has(prevKey)) {
+          EffectKeys.get(Store.Effect)?.delete(prevKey)
+          KeyEffects.get(prevKey)?.delete(Store.Effect)
+          if (KeyEffects.get(prevKey)?.size === 0) {
+            KeyEffects.delete(prevKey)
           }
         }
       }
@@ -149,29 +150,28 @@ export class Store<S extends State = {}, A extends Actions = {}> {
   }
 
   private trackKey(key: EffectKey) {
-    EFFECT_SETTER_KEYS.add(key)
+    EffectSetterKeys.add(key)
   }
 
   public removeTrackedEffect(effect: Effect) {
-    EFFECT_MAP.forEach((deps, key) => {
+    KeyEffects.forEach((deps, key) => {
       deps.delete(effect)
       if (deps.size === 0) {
-        EFFECT_MAP.delete(key)
+        KeyEffects.delete(key)
       }
     })
-    EFFECT_KEYS.delete(effect)
+    EffectKeys.delete(effect)
   }
 
   private notify() {
     batch(() => {
-      EFFECT_SETTER_KEYS.forEach((key) => {
-        EFFECT_MAP.get(key)?.forEach((effect) => {
+      EffectSetterKeys.forEach((key) => {
+        KeyEffects.get(key)?.forEach((effect) => {
           effect()
         })
       })
-
-      EFFECT_SETTER_KEYS.clear()
     })
+    EffectSetterKeys.clear()
   }
 }
 

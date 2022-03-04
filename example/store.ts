@@ -107,12 +107,15 @@ export const todoStore = createStore({
   state: {
     todoList: rawTodoList,
     date: {
+      display: false,
       time: new Date().toLocaleTimeString()
     }
   },
   actions: {
+    toggleTimeDisplay() {
+      this.date.display = !this.date.display
+    },
     updateTime() {
-      console.clear()
       this.date.time = new Date().toLocaleTimeString()
     },
     setToDoList(todoList) {

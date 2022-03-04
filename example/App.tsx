@@ -1,24 +1,40 @@
 import React, { useState } from 'react'
 import ReactDOM from 'react-dom'
 import { useStore, Provider, connect } from '../src'
-import { todoStore, TodoStoreValue, TodoStoreState, TodoStoreActions } from './store'
+import { todoStore, TodoStoreState, TodoStoreActions } from './store'
 
 import './index.css'
 
+const Time = () => {
+  const store = useStore({
+    mapState: (s: TodoStoreState) => ({
+      time: s.date.time
+    })
+  })
+  console.log('Time render')
+
+  return <span>{store.time}</span>
+}
+
 const Header = connect({
   mapState: (s: TodoStoreState) => ({
-    time: s.date.time
+    display: s.date.display
   }),
   mapActions: (a: TodoStoreActions) => ({
-    updateTime: a.updateTime
+    updateTime: a.updateTime,
+    toggleTimeDisplay: a.toggleTimeDisplay
   })
-})(({ time, updateTime }) => {
+})(({ display, updateTime, toggleTimeDisplay }) => {
   console.log('Header render')
 
   return (
     <header>
       <h1>To Do List</h1>
-      <p onClick={updateTime}>{time}</p>
+      <label className="switch">
+        <input type="checkbox" onChange={toggleTimeDisplay} checked={display} />
+        <span className="slider round"></span>
+      </label>
+      <p onClick={updateTime}>{display && <Time />}</p>
     </header>
   )
 })
