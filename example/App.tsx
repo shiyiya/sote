@@ -110,10 +110,6 @@ const ToDoForm = () => {
   })
 
   const addTask = (userInput) => {
-    const copy = [
-      ...store.todoList,
-      { id: store.todoList.length + 1, task: userInput, complete: false }
-    ]
     store.addToDo({ id: store.todoList.length + 1, task: userInput, complete: false })
   }
 
