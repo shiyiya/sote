@@ -1,11 +1,12 @@
 import React, { useState } from 'react'
 import ReactDOM from 'react-dom'
-import { useStore, Provider, connect } from '../src'
-import { todoStore, TodoStoreState, TodoStoreActions } from './store'
+import { useStore, Provider, connect, useCommit } from '../src'
+import { todoStore, TodoStoreState, TodoStoreValue, TodoStoreActions } from './store'
 
 import './index.css'
 
 const Time = () => {
+  const commit = useCommit<TodoStoreValue>()
   const store = useStore({
     mapState: (s: TodoStoreState) => ({
       time: s.date.time
@@ -13,7 +14,17 @@ const Time = () => {
   })
   console.log('Time render')
 
-  return <span>{store.time}</span>
+  return (
+    <p
+      onClick={() => {
+        commit((state) => {
+          state.date.time = new Date().toLocaleTimeString()
+        })
+      }}
+    >
+      {store.time}
+    </p>
+  )
 }
 
 const Header = connect({
@@ -21,10 +32,9 @@ const Header = connect({
     display: s.date.display
   }),
   mapActions: (a: TodoStoreActions) => ({
-    updateTime: a.updateTime,
     toggleTimeDisplay: a.toggleTimeDisplay
   })
-})(({ display, updateTime, toggleTimeDisplay }) => {
+})(({ display, toggleTimeDisplay }) => {
   console.log('Header render')
 
   return (
@@ -34,7 +44,7 @@ const Header = connect({
         <input type="checkbox" onChange={toggleTimeDisplay} checked={display} />
         <span className="slider round"></span>
       </label>
-      <p onClick={updateTime}>{display && <Time />}</p>
+      {display && <Time />}
     </header>
   )
 })
