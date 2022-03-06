@@ -68,18 +68,17 @@ const ToDoList = () => {
     })
     store.setToDoList(filtered)
   }
-
   console.log('ToDoList render')
 
   return (
-    <div>
+    <p>
       {store.todoList.map((todo, i) => {
         return <ToDo todo={todo} handleToggle={handleToggle} key={i} />
       })}
-      <button style={{ margin: '20px' }} onClick={handleFilter}>
+      <button style={{ margin: '10px' }} onClick={handleFilter}>
         Clear Completed
       </button>
-    </div>
+    </p>
   )
 }
 

@@ -136,7 +136,7 @@ export const todoStore = createStore({
       )
     },
     // next api
-    waitRemoveToDo({ commit, props }) {
+    waitRemoveToDo(props, { commit }) {
       setTimeout(() => {
         this.todoList.push({
           id: this.todoList.length + 1,
