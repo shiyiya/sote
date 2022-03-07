@@ -24,7 +24,7 @@ const Header = connect({
     updateTime: a.updateTime,
     toggleTimeDisplay: a.toggleTimeDisplay
   })
-})(({ display, updateTime, toggleTimeDisplay }) => {
+})(function Header({ display, updateTime, toggleTimeDisplay }) {
   console.log('Header render')
 
   return (
@@ -148,8 +148,10 @@ function App() {
 }
 
 ReactDOM.render(
-  <Provider value={todoStore}>
-    <App />
-  </Provider>,
+  <React.StrictMode>
+    <Provider value={todoStore}>
+      <App />
+    </Provider>
+  </React.StrictMode>,
   document.getElementById('app')
 )

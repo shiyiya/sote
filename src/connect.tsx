@@ -18,7 +18,7 @@ export function connect<
   RA extends Actions = any
 >(options?: ConnectOptions<S, RS, RA>) {
   return (WrappedComponent: React.ComponentType<RS & RA>): React.FC =>
-    (...props) => {
+    function Connect(...props) {
       const store = useStore(options)
 
       if (process.env.NODE_ENV !== 'production') {
