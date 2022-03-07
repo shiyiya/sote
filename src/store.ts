@@ -1,5 +1,5 @@
 import { unstable_batchedUpdates as batch } from 'react-dom'
-import { isFunction, isObject, isPromise } from './utils'
+import { isFunction, isObject, isPromise, isArray } from './utils'
 
 export type State =
   | Record<string | number | symbol, any>
@@ -39,14 +39,14 @@ export class Store<S extends State = {}, A extends Actions = {}> {
   private reactify(state: any, path = '') {
     return new Proxy(state, {
       get: (target, key, receiver) => {
-        const fullKey = path + '.' + key.toString()
+        const fullKey = `${path}.${String(key)}`
 
         if (Object.hasOwnProperty.call(target, key)) {
           if (copy.has(fullKey)) return copy.get(fullKey)
 
           this.trackEffect(fullKey)
 
-          if (isObject(target[key])) {
+          if (isObject(target[key]) || isArray(target[key])) {
             const p = this.reactify(state[key], fullKey)
             return copy.set(key, p), p
           }
@@ -57,22 +57,20 @@ export class Store<S extends State = {}, A extends Actions = {}> {
       set: (target, key, value, receiver) => {
         const targetValue = target[key]
 
-        if (value === targetValue && key !== 'length') {
+        if (Object.is(value, targetValue)) {
           return true
         }
 
-        const fullKey = path + '.' + key.toString()
-
-        if (key === 'length' || Array.isArray(target)) {
+        const fullKey = `${path}.${String(key)}`
+        if (isArray(target)) {
           // push pop shift unshift
           this.trackKey(path.substring(1))
         } else {
           this.trackKey(fullKey.substring(1))
         }
 
-        if (isObject(targetValue)) {
+        if (isObject(value) || isArray(value)) {
           copy.delete(fullKey)
-
           value = this.reactify(value, fullKey)
         }
 

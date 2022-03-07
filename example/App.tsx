@@ -71,14 +71,14 @@ const ToDoList = () => {
   console.log('ToDoList render')
 
   return (
-    <p>
-      {store.todoList.map((todo, i) => {
-        return <ToDo todo={todo} handleToggle={handleToggle} key={i} />
-      })}
+    <div className="todo-list">
+      {store.todoList.map((todo, i) => (
+        <ToDo todo={todo} handleToggle={handleToggle} key={i} />
+      ))}
       <button style={{ margin: '10px' }} onClick={handleFilter}>
         Clear Completed
       </button>
-    </p>
+    </div>
   )
 }
 
@@ -144,11 +144,11 @@ const ToDoForm = () => {
 
 function App() {
   return (
-    <div className="App">
+    <>
       <Header />
       <ToDoList />
       <ToDoForm />
-    </div>
+    </>
   )
 }
 
