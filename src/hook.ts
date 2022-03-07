@@ -50,3 +50,9 @@ export function useStore<S extends Store = Store, RS extends State = any, RA ext
 
   return store
 }
+
+export const useCommit = <S extends Store = Store>() => {
+  const context = useContext<SoteContextValue<PinkStoreState<S>, PinkStoreActions<S>>>(SoteContext)
+
+  return context.commit.bind(context)
+}

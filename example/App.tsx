@@ -1,11 +1,12 @@
 import React, { useState } from 'react'
 import ReactDOM from 'react-dom'
-import { useStore, Provider, connect } from '../src'
-import { todoStore, TodoStoreState, TodoStoreActions } from './store'
+import { useStore, Provider, connect, useCommit } from '../src'
+import { todoStore, TodoStoreState, TodoStoreValue, TodoStoreActions } from './store'
 
 import './index.css'
 
 const Time = () => {
+  const commit = useCommit<TodoStoreValue>()
   const store = useStore({
     mapState: (s: TodoStoreState) => ({
       time: s.date.time
@@ -13,7 +14,17 @@ const Time = () => {
   })
   console.log('Time render')
 
-  return <span>{store.time}</span>
+  return (
+    <p
+      onClick={() => {
+        commit((state) => {
+          state.date.time = new Date().toLocaleTimeString()
+        })
+      }}
+    >
+      {store.time}
+    </p>
+  )
 }
 
 const Header = connect({
@@ -21,10 +32,9 @@ const Header = connect({
     display: s.date.display
   }),
   mapActions: (a: TodoStoreActions) => ({
-    updateTime: a.updateTime,
     toggleTimeDisplay: a.toggleTimeDisplay
   })
-})(function Header({ display, updateTime, toggleTimeDisplay }) {
+})(function Header({ display, toggleTimeDisplay }) {
   console.log('Header render')
 
   return (
@@ -34,7 +44,7 @@ const Header = connect({
         <input type="checkbox" onChange={toggleTimeDisplay} checked={display} />
         <span className="slider round"></span>
       </label>
-      <p onClick={updateTime}>{display && <Time />}</p>
+      {display && <Time />}
     </header>
   )
 })
@@ -58,18 +68,17 @@ const ToDoList = () => {
     })
     store.setToDoList(filtered)
   }
-
   console.log('ToDoList render')
 
   return (
-    <div>
+    <p>
       {store.todoList.map((todo, i) => {
         return <ToDo todo={todo} handleToggle={handleToggle} key={i} />
       })}
-      <button style={{ margin: '20px' }} onClick={handleFilter}>
+      <button style={{ margin: '10px' }} onClick={handleFilter}>
         Clear Completed
       </button>
-    </div>
+    </p>
   )
 }
 
@@ -101,10 +110,6 @@ const ToDoForm = () => {
   })
 
   const addTask = (userInput) => {
-    const copy = [
-      ...store.todoList,
-      { id: store.todoList.length + 1, task: userInput, complete: false }
-    ]
     store.addToDo({ id: store.todoList.length + 1, task: userInput, complete: false })
   }
 

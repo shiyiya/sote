@@ -171,6 +171,11 @@ export class Store<S extends State = {}, A extends Actions = {}> {
     })
     EffectSetterKeys.clear()
   }
+
+  public commit(effect: (state: S) => void) {
+    effect(this.state)
+    this.notify()
+  }
 }
 
 export const createStore = <S extends State = {}, A extends Actions = {}>(
