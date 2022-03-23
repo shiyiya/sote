@@ -87,10 +87,10 @@ const SoteApp: FC = () => {
 ### useSelector & useActions
 
 ```tsx
-const state = useSelect((s) => {
+const state = useSelect((state) => {
   count: state.count
 })
-const actions = useActions((s) => {
+const actions = useActions((actions) => {
   add: actions.add,
   set: actions.set
   addAsync: actions.addAsync

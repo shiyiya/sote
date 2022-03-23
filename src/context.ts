@@ -10,3 +10,15 @@ if (process.env.NODE_ENV !== 'production') {
 }
 
 export type SoteContextInstance = typeof SoteContext
+
+type Scope = string | number | symbol
+
+const SoteScopeContextMap = new Map<Scope | undefined, SoteContextInstance>()
+
+export const getScopeContext = (scope?: Scope) => {
+  if (!SoteScopeContextMap.has(scope)) {
+    SoteScopeContextMap.set(scope, React.createContext(null as any))
+  }
+
+  return SoteScopeContextMap.get(scope)
+}
