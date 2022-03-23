@@ -1,9 +1,7 @@
 import { unstable_batchedUpdates as batch } from 'react-dom'
 import { isFunction, isObject, isPromise, isArray } from './utils'
 
-export type State =
-  | Record<string | number | symbol, any>
-  | (() => Record<string | number | symbol, any>)
+export type State = Record<string | number | symbol, any> | (() => Record<string | number | symbol, any>)
 
 export type Actions = Record<string, ((...arg: any[]) => void) | ((...arg: any[]) => Promise<void>)>
 
@@ -94,8 +92,7 @@ export class Store<S extends State = {}, A extends Actions = {}> {
 
   private proxyActions(actions: A) {
     for (const key in actions) {
-      // @ts-ignore
-      this.actions[key] = (...args: any[]) => {
+      this.actions[key] = ((...args: any[]) => {
         const returnValue = actions[key].apply(this, args)
 
         if (isPromise(returnValue)) {
@@ -103,7 +100,7 @@ export class Store<S extends State = {}, A extends Actions = {}> {
         } else {
           this.notify()
         }
-      }
+      }) as any
     }
 
     Object.keys(this.actions).forEach((key) => {
@@ -176,9 +173,7 @@ export class Store<S extends State = {}, A extends Actions = {}> {
   }
 }
 
-export const createStore = <S extends State = {}, A extends Actions = {}>(
-  options: StoreOptions<S, A>
-) => {
+export const createStore = <S extends State = {}, A extends Actions = {}>(options: StoreOptions<S, A>) => {
   return new Store(options)
 }
 

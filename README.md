@@ -84,6 +84,19 @@ const SoteApp: FC = () => {
 }
 ```
 
+### useSelector & useActions
+
+```tsx
+const state = useSelect((s) => {
+  count: state.count
+})
+const actions = useActions((s) => {
+  add: actions.add,
+  set: actions.set
+  addAsync: actions.addAsync
+})
+```
+
 ### Connect
 
 ```tsx

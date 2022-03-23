@@ -1,17 +1,15 @@
 import React, { useState } from 'react'
 import ReactDOM from 'react-dom'
-import { useStore, Provider, connect, useCommit } from '../src'
-import { todoStore, TodoStoreState, TodoStoreValue, TodoStoreActions } from './store'
+import { useStore, Provider, connect, useCommit, useSelector, useActions } from '../src'
+import { todoStore, TodoStoreState, TodoStoreActions, TodoStoreValue } from './store'
 
 import './index.css'
 
 const Time = () => {
-  const commit = useCommit<TodoStoreValue>()
-  const store = useStore({
-    mapState: (s: TodoStoreState) => ({
-      time: s.date.time
-    })
-  })
+  const commit = useCommit()
+  const store = useSelector((s: TodoStoreState) => ({
+    time: s.date.time
+  }))
   console.log('Time render')
 
   return (
@@ -102,15 +100,10 @@ const ToDo = ({ todo, handleToggle }) => {
 
 const ToDoForm = () => {
   const [userInput, setUserInput] = useState('')
-
-  // subscribe map store
-  const store = useStore({
-    mapState: (s: TodoStoreState) => ({ todoList: s.todoList }),
-    mapActions: (a: TodoStoreActions) => a
-  })
+  const { addToDo, waitAddToDo } = useActions<TodoStoreValue>()
 
   const addTask = (userInput) => {
-    store.addToDo({ id: store.todoList.length + 1, task: userInput, complete: false })
+    addToDo({ id: Date.now(), task: userInput, complete: false })
   }
 
   const handleChange = (e) => {
@@ -125,7 +118,7 @@ const ToDoForm = () => {
 
   const handleWaitSubmit = (e) => {
     e.preventDefault()
-    store.waitAddToDo(userInput)
+    waitAddToDo(userInput)
     setUserInput('')
   }
 
